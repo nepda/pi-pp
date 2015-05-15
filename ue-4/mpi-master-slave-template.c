@@ -14,29 +14,32 @@ void master () {
     while ( /* there are jobs unprocessed */ || /* there are slaves still working on jobs */ ) {
 
         // Wait for any incomming message
-        MPI_Probe (/*...*/, /*...*/, MPI_COMM_WORLD, &stat);
+        MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TYPE, MPI_COMM_WORLD, &stat);
 
         // Store rank of receiver into slave_rank
-        int slave_rank = /* rank of received message */
+        int slave_rank = stat.MPI_SOURCE;
 
         // Decide according to the tag which type of message we have got
-        if ( stat . MPI_TAG == TAG_ASK_FOR_JOB ) {
-            MPI_Recv (... , slave_rank , TAG_ASK_FOR_JOB , MPI_COMM_WORLD , & stat2 ) ;
+        if (stat.MPI_TAG == TAG_ASK_FOR_JOB) {
+
+            MPI_Recv(buff, slave_rank, TAG_ASK_FOR_JOB, MPI_COMM_WORLD, &stat2);
+
             if (/* there are unprocessed jobs */) {
 
                 // here we have unprocessed jobs , we send one job to the slave
                 job = /* compute job */
-                    /* pack data of job into the buffer msg_buffer */
-                    MPI_Send ( msg_buffer ,/*...*/ , slave_rank , TAG_JOB_DATA , MPI_COMM_WORLD);
+                /* pack data of job into the buffer msg_buffer */
+                MPI_Send(msg_buffer, /*...*/ , slave_rank, TAG_JOB_DATA, MPI_COMM_WORLD);
                 /* mark slave with rank my_rank as working on a job */
             } else {
+
                 // send stop msg to slave
                 MPI_Send (/*...*/ , slave_rank , TAG_STOP , MPI_COMM_WORLD);
             }
         } else {
 
             // We got a result message
-            MPI_Recv ( result_data_buffer , /*...*/ , slave_rank , TAG_RESULT, MPI_COMM_WORLD , & stat2 );
+            MPI_Recv( result_data_buffer , /*...*/ , slave_rank , TAG_RESULT, MPI_COMM_WORLD , & stat2 );
             /* put data from result_data_buffer into a global result */
             /* mark slave with rank slave_rank as stopped */
         }
@@ -70,13 +73,18 @@ void slave () {
 }
 
 
-int main ( int argc , char ** argv ) {
-    MPI_Init (& argc , & argv );
-    MPI_Comm_rank ( MPI_COMM_WORLD , & rank ) ;
-    if ( rank == 0) {
+int main(int argc, char **argv) {
+
+    int rank;
+
+    MPI_Init(&argc , & argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if (rank == 0) {
         master () ;
     } else {
         slave () ;
     }
+
     MPI_Finalize () ;
 }
