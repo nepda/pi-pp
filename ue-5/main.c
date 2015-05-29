@@ -35,17 +35,18 @@
     MPI_Comm_size(MPI_COMM_WORLD, &num_tasks);
 
     if (num_tasks != SIZE) {
-        printf("We need %d proccesses, %d given. Exiting.\n", SIZE, num_tasks);
+        if (my_rank == 0) {
+            printf("We need %d proccesses, %d given. Exiting.\n", SIZE, num_tasks);
+        }
     } else {
 
         gethostname(hostname, 79);
-
-        printf("%-15.12s: MPI_COMM_WORLD rank %d\n", hostname, my_rank);
 
         MPI_Cart_create(MPI_COMM_WORLD, DIM, dims, periods, reorder, &cartcomm);
 
         MPI_Cart_coords(cartcomm, my_rank, DIM, coords);
 
+        printf("%-15.12s: MPI_COMM_WORLD rank %2d: (%d, %d, %d)\n", hostname, my_rank, coords[0], coords[1], coords[2]);
     }
 
     MPI_Finalize();
