@@ -31,8 +31,8 @@
     MPI_Comm cartcomm;
 
     MPI_Init(&argc, &argv);
-    MPI_Rank(&my_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, num_tasks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_tasks);
 
     if (num_tasks != SIZE) {
         printf("We need %d proccesses, %d given. Exiting.\n", SIZE, num_tasks);
@@ -40,7 +40,7 @@
 
         gethostname(hostname, 79);
 
-        printf("%-15.12s: MPI_COMM_WORLD rank %d\n", hostname, rank);
+        printf("%-15.12s: MPI_COMM_WORLD rank %d\n", hostname, my_rank);
 
         MPI_Cart_create(MPI_COMM_WORLD, DIM, dims, periods, reorder, &cartcomm);
 
