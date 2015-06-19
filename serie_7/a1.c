@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 
     MPI_Win_create(&w, sizeof(double), sizeof(double), MPI_INFO_NULL, comm2d, &win);
 
-    MPI_Win_fence(NO_PRECEED, win);
+    MPI_Win_fence(MPI_MODE_NOPRECEDE, win);
 
     for (z = 0; z < m; z++) {
         double buff[4];

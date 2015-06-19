@@ -1,41 +1,42 @@
-#include <stdio.h>
-#include <unistd.h>
 #include "mpi.h"
+#include <stdio.h>
 
-
-void heartbeat_master() {
-
-}
-
-void heartbeat_worker() {
-
-    while (1) {
-        MPI_Send();
-        sleep(1);
-    }
-}
 
 int main(int argc, char *argv[]) {
-    MPI_Init(&argc, &argv);
 
     int my_rank,
             size,
-            base = 0;
+            z;
 
+    MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+    double w = my_rank;
 
-    if (my_rank == 0) {
-        // check...
-        MPI_Win_create(base, size, dsp_unit, info, MPI_COMM_WORLD);
-    } else {
+    MPI_Win win;
 
+    MPI_Win_create(&w, sizeof(double), sizeof(double), MPI_INFO_NULL, comm2d, &win);
 
-        MPI_Accumulate(0, origin_count, MPI_INT, 0, target_disp, target_count, MPI_INT, tuuuut, 0);
+    for (z = 0; z < m; z++) {
+        double buff = w;
+        w = 0.0;
+        MPI_Win_fence(0, win);
+        MPI_Accumulate(&buff, 1, MPI_DOUBLE, left, 0, 1, MPI_DOUBLE, MPI_SUM, win);
+        MPI_Accumulate(&buff, 1, MPI_DOUBLE, right, 0, 1, MPI_DOUBLE, MPI_SUM, win);
+        MPI_Accumulate(&buff, 1, MPI_DOUBLE, up, 0, 1, MPI_DOUBLE, MPI_SUM, win);
+        MPI_Accumulate(&buff, 1, MPI_DOUBLE, down, 0, 1, MPI_DOUBLE, MPI_SUM, win);
+        MPI_Win_fence(0, win);
+        w = 0.0;
 
-        heartbeat_worker();
+        for (int i = 0; i < 4; i++) {
+            w += buff[i];
+        }
+        w /= 4;
     }
+    MPI_Win_free(&win);
+
 
     MPI_Finalize();
+    return 0;
 }
