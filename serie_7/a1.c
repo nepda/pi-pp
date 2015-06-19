@@ -25,11 +25,23 @@ int main(int argc, char *argv[]) {
 
     MPI_Win_create(&w, sizeof(double), sizeof(double), MPI_INFO_NULL, comm2d, &win);
 
-    MPI_Win_fence()
+    MPI_Win_fence(NO_PRECEED, win);
 
     for (z = 0; z < m; z++) {
+        double buff[4];
+        MPI_Get(&buff[0], 1, MPI_DOUBLE, left, 0, 1, MPI_DOUBLE, win);
+        MPI_Get(&buff[1], 1, MPI_DOUBLE, right, 0, 1, MPI_DOUBLE, win);
+        MPI_Get(&buff[2], 1, MPI_DOUBLE, up, 0, 1, MPI_DOUBLE, win);
+        MPI_Get(&buff[3], 1, MPI_DOUBLE, down, 0, 1, MPI_DOUBLE, win);
+        MPI_Win_fence(0, win);
+        w = 0.0;
 
+        for (int i = 0; i < 4; i++) {
+            w += buff[i];
+        }
+        w /= 4;
     }
+    MPI_Win_free(&win);
 
 
     MPI_Finalize();

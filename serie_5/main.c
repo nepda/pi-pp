@@ -1,6 +1,5 @@
-#include "mpi.h"
+#include <mpi.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #define false 0
 #define true  1
@@ -72,7 +71,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
-
-
-
