@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
     MPI_Comm comm2d;
 
-    MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periods, 1, &comm2d)
+    MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periods, 1, &comm2d);
     int left, right, down, up;
 
     MPI_Cart_shift(comm2d, 0, 1, &left, &right);

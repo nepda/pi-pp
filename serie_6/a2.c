@@ -1,11 +1,10 @@
 #include "mpi.h"
 #include <stdio.h>
 
-unsigned int log2( unsigned int x )
-{
-    unsigned int ans = 0 ;
-    while( x>>=1 ) ans++;
-    return ans ;
+unsigned int log2(unsigned int x) {
+    unsigned int ans = 0;
+    while (x >>= 1) ans++;
+    return ans;
 }
 
 void hypercube_reduce(int input, int *output, MPI_Comm comm) {
