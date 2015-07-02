@@ -16,22 +16,21 @@
  * Auf dem Knoten:
  * - mpirun -np 2 ./a1
  */
-int main(int argc, char** argv)
-{
-        MPI_Init(&argc, &argv);
+int main(int argc, char **argv) {
+    MPI_Init(&argc, &argv);
 
-        //  Rang, Anzahl Prozessoren
-        int rank, comm_size;
+    //  Rang, Anzahl Prozessoren
+    int rank, comm_size;
 
-        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-        MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
 
-        char hostname[256];
-        gethostname(hostname, 256);
+    char hostname[256];
+    gethostname(hostname, 256);
 
-        printf("Rang: %d, Anzahl: %d, Hostname: %s\n", rank, comm_size, hostname);
+    printf("Rang: %d, Anzahl: %d, Hostname: %s\n", rank, comm_size, hostname);
 
-        MPI_Finalize();
+    MPI_Finalize();
 
-        return 0;
+    return 0;
 }

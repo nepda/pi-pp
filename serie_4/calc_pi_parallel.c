@@ -1,4 +1,3 @@
-
 #include <mpi.h>
 #include <stdio.h>
 
@@ -13,10 +12,9 @@ Effizienz 1      1     0,93  0,88
 Schleife ist unabhänging von anderen Interationen, da Addition kommutativ ist.
 */
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     const int intervals = 1000000000;
-    double pi = 0.0;
+    double local_pi = 0.0;
 
     int comm_size, rank;
 
@@ -30,14 +28,14 @@ int main(int argc, char *argv[])
     int j;
     for (j = rank; j <= intervals; j += comm_size) {
         double x = ((double) j - 0.5) * delta;
-        pi += 4.0 / (1.0 + (x * x));
+        local_pi += 4.0 / (1.0 + (x * x));
     }
 
-    double temp_pi;
-    MPI_Reduce(&pi, &temp_pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    double final_pi;
+    MPI_Reduce(&local_pi, &final_pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
     if (rank == 0) {
-        printf ("Pi = %.10f\n", temp_pi * delta);
+        printf("Pi = %.10f\n", final_pi * delta);
     }
 
     MPI_Finalize();
