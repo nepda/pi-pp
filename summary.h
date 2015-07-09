@@ -414,10 +414,154 @@ int MPI_Group_rank(MPI_Group group, int *rank);
 
 /**
  * @brief To check whether two process groups describe the same process group
+ *
+ * `res`:
+ * * `MPI_IDENT` The groups `group1` and `group2` contain the **same processes in the same order**
+ * * `MPI_SIMILAR` Both groups contain the **same processes** but different order
+ * * `MPI_UNEQUAL` The two groups contain **different processes**
  */
 int MPI_Group_compare(MPI_Group group1, MPI_Group group2, int *result);
 
+/**
+ * @brief Generation of a new intra-communicator to a given group of processes
+ *
+ * **All** processes of comm must call MPI_Comm_create() with **the same group** as an argument.
+ *
+ * Result of the call: each calling process which is a member of group `group` obtains a pointer to
+ * the new communicator `newcomm`.
+ *
+ * Processes not belonging to group get `MPI_COMM_NULL` as return value in `new_comm`.
+ *
+ * @param group Must specify a process gorup which is a subset of the process `group` associated with communicator `comm`.
+ */
+int MPI_Comm_create(MPI_Comm comm, MPI_Group group, MPI_Comm *newcomm);
 
+/**
+ * @brief Splitting of a communicator
+ *
+ * The process group associated with communicator `comm` is partitioned into a number of
+ * disjoint subgroups that equals the number of different values specified in `color`.
+ *
+ * Each subgroup contains all processes that specify the same value for `color`.
+ *
+ * The rank order of the processes within a subgroup is defined by the argument `key`.
+ *
+ * If two processes specify the same value for `key` the order of the original group is used.
+ *
+ * If a process specifies `color = MPI_UNDEFINED`, it is not a member of any of the subgroups generated.
+ *
+ * Each participating process gets a pointer `new_comm` to the communicator of that subgroup which
+ * the process belongs to.
+ *
+ */
+int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm);
+
+
+/**
+ * @brief Definition of a virtual Cartesian grid structure of arbitrary dimension
+ *
+ * The array `periods` of size `ndims` specifies for each dimension whether the grid is periodic
+ * (entry 1) or not (entry 0) in this dimension.
+ *
+ * @param old_comm Is the original communicator **without topology**
+ * @param ndims Specifies the **number** of dimensions of hte grid to be created
+ * @param dims Is an integer array with `ndims` elements where `dims[i]` denotes the **total number of processes in
+ * dimension `i`**
+ * @param reorder For `reorder = false`, the processes in `comm_cart` have the same rank as in `old_comm`
+ */
+int MPI_Cart_create(MPI_Comm old_comm, int ndims, const int dims[],
+                    const int periods[], int reorder, MPI_Comm *comm_cart);
+
+/**
+ * @brief Select a balanced distribution of the processes for the different dimensions
+ *
+ * In the case `dims[i] = 0` is specified for the call, `dims[i]` contains the number of
+ * processes in dimension `i` after the call.
+ *
+ * The function tries to assign the same number of processes to each dimension.
+ *
+ * The number of processes in a dimension `i` can be fixed by setting `dims[i]` to the desired
+ * number of processes before the call. The MPI runtime system sets the entries of the other,
+ * non-initialized entries of `dims` accordingly.
+ *
+ * @param nnodes Is the total number of processes in the grid
+ * @param ndims Is the number of dimensions in the grid to be defined
+ * @param dims Is an integer array of size `ndims`.
+ */
+int MPI_Dims_create(int nnodes, int ndims, int dims[]);
+
+/**
+ * @param Translation of Cartesian coordinates into group ranks
+ *
+ * The call translates the Cartesian coordinates of a process provided in the array `coords`
+ * into the group rank according to the virtual grid associated with `comm`.
+ */
+int MPI_Cart_rank(MPI_Comm comm, const int coords[], int *rank);
+
+/**
+ * @brief Translation of group ranks into Cartesian coordinates
+ *
+ * The cartesian coordinates of the process are returned in the array `coords`.
+ *
+ * @param rank Contains the process number
+ * @param dims Denotes the number of dimensions in the virtual grid defined for communicator `comm`.
+ */
+int MPI_Cart_coords(MPI_Comm comm, int rank, int maxdims, int coords[]);
+
+/**
+ * @brief Determining the neighboring processes in each dimension of the grid
+ *
+ * The result of the call is that `rank_dest` contains the group rank of the neighboring process in
+ * the specified dimension and distance;
+ * `rank_source` returns the rank of the process for which the calling process is the neighbor in the
+ * specified dimension and distance.
+ *
+ * * positive value: request neighbors in upward direction;
+ * * negative value: request neighbors in downward direction.
+ *
+ * @param direction Specifies the dimension for which the neighboring process should be determined.
+ * @param disp Specifies the displacement desired.
+ */
+int MPI_Cart_shift(MPI_Comm comm, int direction, int disp,
+                   int *rank_source, int *rank_dest);
+
+
+/**
+ * @brief A virtual topology can be partitioned into subgrids
+ *
+ * The subgrid selection is controlled by the array `remain_dims` which contains an entry for each
+ * dimension of the original grid.
+ *
+ * Setting `remain_dims[i]=1` means that the ith dimension is kept in the subgrid;
+ *
+ * `remain_dims[i]=0` means that the ith dimension is dropped in the subgrid.
+ *
+ * If a dimension `i` does not exist in the subgrid, the size of dimension `i` defines the number
+ * of subgrids that have been generated for this dimension.
+ *
+ * @param comm Is the communicator for which the virtual topology has been defined;
+ * @param new_comm Denotes the new communicator for which the new topology as a subgrid of
+ * the original grid is defined.
+ */
+int MPI_Cart_sub(MPI_Comm comm, const int remain_dims[], MPI_Comm *new_comm);
+
+/**
+ * @brief Number of dimensions of the virtual grid
+ */
+int MPI_Cartdim_get(MPI_Comm comm, int *ndims);
+
+/**
+ * @brief Cartesian coordinates of the calling process within the virtual grid associated with communicator comm
+ *
+ * Where `maxdims` is the number of dimensions of the virtual topology, and `dims`,
+ * `periods`, and `coords` are arrays of size `maxdims`.
+ *
+ * The arrays `dims` and periods have the same meaning as for MPI_Cart_create().
+ *
+ * The array `coords` is used to return the coordinates.
+ */
+int MPI_Cart_get(MPI_Comm comm, int maxdims, int dims[],
+                 int periods[], int coords[]);
 
 // Thomas
 /**
@@ -427,7 +571,7 @@ int MPI_Group_compare(MPI_Group group1, MPI_Group group2, int *result);
  ** global computation phases and
  ** global communication phases
  * 
- */ 
+ */
 int MPI_Win_fence(int assert, MPI_Win win);
 
 /**
@@ -494,7 +638,17 @@ int main(int argc, char **argv) {
     MPI_Group_size();
     MPI_Group_rank();
     MPI_Group_compare();
-    
+    MPI_Comm_create();
+    MPI_Comm_split();
+    MPI_Cart_create();
+    MPI_Dims_create();
+    MPI_Cart_rank();
+    MPI_Cart_coords();
+    MPI_Cart_shift();
+    MPI_Cart_sub();
+    MPI_Cartdim_get();
+    MPI_Cart_get();
+
     // Thomas
     MPI_Win_fence();
     MPI_Win_start();
