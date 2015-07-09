@@ -418,6 +418,11 @@ int MPI_Group_rank(MPI_Group group, int *rank);
 int MPI_Group_compare(MPI_Group group1, MPI_Group group2, int *result);
 
 
+
+// Thomas
+
+// ende
+
 int main(int argc, char **argv) {
 
     MPI_Init();

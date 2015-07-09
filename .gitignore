@@ -3,3 +3,4 @@ html
 latex
 rtf
 CMakeLists.txt
+mpi.h
