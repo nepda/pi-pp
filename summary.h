@@ -420,7 +420,40 @@ int MPI_Group_compare(MPI_Group group1, MPI_Group group2, int *result);
 
 
 // Thomas
+/**
+ * @brief Global synchronization of a process group of a window
+ * 
+ * Suitable for regular applications with alternating
+ ** global computation phases and
+ ** global communication phases
+ * 
+ */ 
+int MPI_Win_fence(int assert, MPI_Win win);
 
+/**
+ * @brief Starts an RMA access epoch for win
+ */
+int MPI_Win_start(MPI_Group group, int assert, MPI_Win win);
+
+/**
+ * @brief Completes an RMA access epoch on win started by a call to MPI_Win_start
+ */
+int MPI_Win_complete(MPI_Win win);
+
+/**
+ * @brief Starts an RMA exposure epoch for the local window associated with win
+ */
+int MPI_Win_post(MPI_Group group, int assert, MPI_Win win);
+
+/**
+ * @brief Completes an RMA exposure epoch started by a call to MPI_Win_post on win
+ */
+int MPI_Win_wait(MPI_Win win);
+
+/**
+ * @brief Attempts to complete an RMA exposure epoch; a nonblocking version of MPI_Win_wait
+ */
+int MPI_Win_test(MPI_Win win, int *flag);
 // ende
 
 int main(int argc, char **argv) {
@@ -461,4 +494,13 @@ int main(int argc, char **argv) {
     MPI_Group_size();
     MPI_Group_rank();
     MPI_Group_compare();
+    
+    // Thomas
+    MPI_Win_fence();
+    MPI_Win_start();
+    MPI_Win_complete();
+    MPI_Win_post();
+    MPI_Win_wait();
+    MPI_Win_test();
+    // ende
 }
