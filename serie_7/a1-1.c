@@ -27,6 +27,11 @@ int main(int argc, char *argv[]) {
 
     MPI_Win_fence(MPI_MODE_NOPRECEDE, win);
 
+    int left, right, down, up;
+
+    MPI_Cart_shift(comm2d, 0, 1, &left, &right);
+    MPI_Cart_shift(comm2d, 1, 1, &down, &up);
+
     for (z = 0; z < m; z++) {
         double buff[4];
         MPI_Get(&buff[0], 1, MPI_DOUBLE, left, 0, 1, MPI_DOUBLE, win);

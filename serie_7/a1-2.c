@@ -18,6 +18,11 @@ int main(int argc, char *argv[]) {
 
     MPI_Win_create(&w, sizeof(double), sizeof(double), MPI_INFO_NULL, comm2d, &win);
 
+    int left, right, down, up;
+
+    MPI_Cart_shift(comm2d, 0, 1, &left, &right);
+    MPI_Cart_shift(comm2d, 1, 1, &down, &up);
+
     for (z = 0; z < m; z++) {
         double buff = w;
         w = 0.0;
@@ -27,11 +32,7 @@ int main(int argc, char *argv[]) {
         MPI_Accumulate(&buff, 1, MPI_DOUBLE, up, 0, 1, MPI_DOUBLE, MPI_SUM, win);
         MPI_Accumulate(&buff, 1, MPI_DOUBLE, down, 0, 1, MPI_DOUBLE, MPI_SUM, win);
         MPI_Win_fence(0, win);
-        w = 0.0;
 
-        for (int i = 0; i < 4; i++) {
-            w += buff[i];
-        }
         w /= 4;
     }
     MPI_Win_free(&win);

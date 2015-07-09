@@ -1,1 +1,5 @@
 *.pdf
+html
+latex
+rtf
+CMakeLists.txt
