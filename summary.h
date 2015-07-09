@@ -421,39 +421,177 @@ int MPI_Group_compare(MPI_Group group1, MPI_Group group2, int *result);
 
 // Thomas
 /**
+ * @brief Returns an elapsed time on the calling processor.
+ * 
+ * start = MPI Wtime();
+ * part to measure();
+ * end = MPI Wtime();
+ * time = end - start;
+ */
+double MPI_Wtime(void);
+
+/**
+ * @brief Abortion of the execution of all processes of a communicator
+ */
+int MPI_Abort(MPI_Comm comm, int errorcode);
+
+/**
+ * @brief a new structure of type `MPI_Info` is created
+ * 
+ * Creates a new info object.
+ */
+int MPI_Info_create(MPI_Info *info);
+
+/**
+ * @brief Adds a key/value pair to info.
+ * 
+ * adds a new pair (`key`, `value`) to `info`, or overwrites an already existing pair by with the same content of key
+ */
+int MPI_Info_set(MPI_Info info, const char *key, const char *value);
+
+/**
+ * @brief Retrieves the value associated with a `key` in an info object.
+ * 
+ * searches in info for a pair with the provided `key` and writes in `value` the
+ * respective value with a max. length of `valuelen`. Value of `flag` is set to
+ * false if no matching pair was found, otherwise it is set to true
+ */
+int MPI_Info_get(MPI_Info info, const char *key, int valuelen,
+                                char *value, int *flag);
+
+/**
+ * @brief Pair (`key`, `value`) can be removed by this function
+ */
+int MPI_Info_delete(MPI_Info info, const char *key);
+
+/**
+ * @brief Spawns a number of identical binaries.
+ * 
+ * New processes can be created in MPI-2 by this function
+ */
+int MPI_Comm_spawn(const char *command, char *argv[], int maxprocs, MPI_Info info,
+                                  int root, MPI_Comm comm, MPI_Comm *intercomm,
+                                  int array_of_errcodes[]);
+
+/**
+ * @brief Spawns multiple binaries, or the same binary with multiple sets of arguments.
+ * 
+ * Several different MPI programs with possibly different command line
+ * arguments can be split off as new processes by this function
+ */
+int MPI_Comm_spawn_multiple(int count, char *array_of_commands[], char **array_of_argv[],
+                                           const int array_of_maxprocs[], const MPI_Info array_of_info[],
+                                           int root, MPI_Comm comm, MPI_Comm *intercomm,
+                                           int array_of_errcodes[]);
+
+/**
  * @brief Global synchronization of a process group of a window
  * 
  * Suitable for regular applications with alternating
  ** global computation phases and
  ** global communication phases
  * 
+ * @see MPI_Win_create
  */ 
 int MPI_Win_fence(int assert, MPI_Win win);
 
 /**
  * @brief Starts an RMA access epoch for win
+ * 
+ * @see MPI_Win_create
  */
 int MPI_Win_start(MPI_Group group, int assert, MPI_Win win);
 
 /**
  * @brief Completes an RMA access epoch on win started by a call to MPI_Win_start
+ * 
+ * @see MPI_Win_create
  */
 int MPI_Win_complete(MPI_Win win);
 
 /**
  * @brief Starts an RMA exposure epoch for the local window associated with win
+ * 
+ * @see MPI_Win_create
  */
 int MPI_Win_post(MPI_Group group, int assert, MPI_Win win);
 
 /**
  * @brief Completes an RMA exposure epoch started by a call to MPI_Win_post on win
+ * 
+ * @see MPI_Win_create
  */
 int MPI_Win_wait(MPI_Win win);
 
 /**
  * @brief Attempts to complete an RMA exposure epoch; a nonblocking version of MPI_Win_wait
+ * 
+ * @see MPI_Win_create
  */
 int MPI_Win_test(MPI_Win win, int *flag);
+
+/**
+ * @brief Setting a lock before accessing
+ */
+int MPI_Win_lock(int lock_type, int rank, int assert, MPI_Win win);
+
+/**
+ * @brief Releasing a lock after access
+ * 
+ * @see MPI_Win_create
+ */
+int MPI_Win_unlock(int rank, MPI_Win win);
+
+/**
+ * @brief Accumulation of data in the memory of another process
+ * 
+ * Combines the contents of the origin buffer with that of a target buffer.
+ * 
+ * @see MPI_Win_create
+ */
+int MPI_Accumulate(const void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+                                  int target_rank, MPI_Aint target_disp, int target_count,
+                                  MPI_Datatype target_datatype, MPI_Op op, MPI_Win win);
+
+/**
+ * @brief Reading a data block from the memory of another process
+ * 
+ * Copies data from the target memory to the origin.
+ * 
+ * @param origin_addr is the starting address of the receive buffer in the local memory of the calling process,
+ * @param origin_count specifies the number of elements from type `origin_type`, transferred to the receiving buffer.
+ * @param target_rank is the rank of the target process, i.e. the process to be read from
+ * @param win is the window object
+ * 
+ * @see MPI_Win_create
+ */
+int MPI_Get(void *origin_addr, int origin_count,
+                           MPI_Datatype origin_datatype, int target_rank,
+                           MPI_Aint target_disp, int target_count,
+                           MPI_Datatype target_datatype, MPI_Win win);
+
+/**
+ * @brief Copies data from the origin memory to the target.
+ * 
+ * @see MPI_Win_create
+ */
+int MPI_Put(const void *origin_addr, int origin_count, MPI_Datatype origin_datatype,
+                           int target_rank, MPI_Aint target_disp, int target_count,
+                           MPI_Datatype target_datatype, MPI_Win win);
+
+/**
+ * @brief One-sided MPI call that returns a window object for RMA operations.
+ * 
+ * each process from the communicator comm has to execute that operation
+ */
+int MPI_Win_create(void *base, MPI_Aint size, int disp_unit, MPI_Info info, MPI_Comm comm, MPI_Win *win);
+
+/**
+ * @brief Frees the window object and returns a null handle.
+ * 
+ * All operations of a participating processes have to be finished
+ */
+int MPI_Win_free(MPI_Win *win);
 // ende
 
 int main(int argc, char **argv) {
@@ -496,11 +634,30 @@ int main(int argc, char **argv) {
     MPI_Group_compare();
     
     // Thomas
+    MPI_Wtime();
+    MPI_Abort();
+    MPI_Info_create();
+    MPI_Info_set();
+    MPI_Info_get();
+    MPI_Info_delete();
+    MPI_Comm_spawn();
+    MPI_Comm_spawn_multiple();
+    MPI_Win_create();
+    MPI_Win_free();
+    MPI_Accumulate();
+    MPI_Get();
+    MPI_Put();
     MPI_Win_fence();
     MPI_Win_start();
     MPI_Win_complete();
     MPI_Win_post();
     MPI_Win_wait();
     MPI_Win_test();
+    MPI_Win_lock();
+    MPI_Win_unlock();
+
+
+
+    
     // ende
 }
