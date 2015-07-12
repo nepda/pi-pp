@@ -1,0 +1,33 @@
+10.7.2015 - Konsultation
+
+for (int i = 0; i < n; i++) {
+
+    y[i] = 0.0;
+    for (int j = 0; j < n; j++) {
+        y[i] += A[i*n+j] * x[j];
+    }
+}
+
+for (i = 0; i < n; i++) {
+    x[i] = y[i];
+}
+
+
+// --- Parallele Variante ---
+
+double *local_a = malloc(sizeof(double)*n*n/p);
+double *local_y = malloc(sizeof(double)*n/p);
+
+MPI_Bcast(x, n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+MPI_Scatter(A, n*n/p, MPI_DOUBLE, local_a, n*n/p, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+for (int i = myrank * n / p; i < (myrank + 1) * n / p; i++) {
+
+    int local_i = i-myrank*n/p;
+    local_y[local_i] = 0.0;
+    for (int j = 0; j < n; j++) {
+        local_y[local_i] += local_a[local_i * n + j] * x[j];
+    }
+}
+
+MPI_Gather(local_y, n/p, MPI_DOUBLE, x, n/p, MPI_DOUBLE, 0, MPI_COMM_WORLD);

@@ -111,10 +111,3 @@ void gather_ring3(float x[], int size, float y[]) {
         // ...
     }
 }
-
-
-
-
-
-
-

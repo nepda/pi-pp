@@ -14,3 +14,13 @@
 	qsub -I -l nodes=4:ppn=1,walltime=00:10:00 -q short
 	
 	mpirun -np 4 ./programm
+
+
+Wenn `openmpi` auf dem lokalen Rechner installiert ist, können die Programme auch lokal ausgeführt werden
+
+	mpicc -o programm programm.c
+	mpirun -np 4 ./programm
+	
+In ArchLinux kann `openmpi` mit pacman installiert werden:
+
+	pacman -S openmpi

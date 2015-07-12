@@ -1,3 +1,10 @@
+/**
+ * @file summary.h
+ *
+ * @brief This file contains all MPI functions, mentioned in the Parallel Programming course script.
+ *
+ */
+
 #include "mpi.h"
 
 
@@ -263,6 +270,13 @@ int MPI_Gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 int MPI_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                 void *recvbuf, int recvcount, MPI_Datatype recvtype,
                 int root, MPI_Comm comm);
+
+/**
+ * @brief Flexible number of data elements per receiver: vector-based version MPI_Scatterv
+ */
+int MPI_Scatterv(const void *sendbuf, const int sendcounts[], const int displs[],
+                 MPI_Datatype sendtype, void *recvbuf, int recvcount,
+                 MPI_Datatype recvtype, int root, MPI_Comm comm);
 
 /**
  * @brief Multi-broadcast operation: Each process sends the same block of data to each other process
@@ -566,11 +580,13 @@ int MPI_Cart_get(MPI_Comm comm, int maxdims, int dims[],
 // Thomas
 /**
  * @brief Returns an elapsed time on the calling processor.
- * 
- * start = MPI Wtime();
- * part to measure();
- * end = MPI Wtime();
+ *
+ * <code>
+ * start = MPI_Wtime();\n
+ * // part to measure();\n
+ * end = MPI_Wtime();\n
  * time = end - start;
+ * </code>
  */
 double MPI_Wtime(void);
 
@@ -762,6 +778,7 @@ int main(int argc, char **argv) {
     MPI_Gather();
     MPI_Gatherv();
     MPI_Scatter();
+    MPI_Scatterv();
     MPI_Allgather();
     MPI_Allgatherv();
     MPI_Allreduce();

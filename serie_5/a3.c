@@ -1,9 +1,7 @@
-
 #include <stdio.h>
 #include "mpi.h"
 
-int main (int argc, char argv[])
-{
+int main(int argc, char argv[]) {
 
     /*
      * C_1 = {4,3,2,1,0}
