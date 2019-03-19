@@ -14,7 +14,7 @@ void master () {
     while ( /* there are jobs unprocessed */ || /* there are slaves still working on jobs */ ) {
 
         // Wait for any incomming message
-        MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TYPE, MPI_COMM_WORLD, &stat);
+        MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
 
         // Store rank of receiver into slave_rank
         int slave_rank = stat.MPI_SOURCE;
